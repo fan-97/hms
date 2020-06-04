@@ -66,7 +66,7 @@ public class DataUtil {
     public static Room getRoom(String roomNumber) {
         if (roomNumber != null) {
             for (int i = 0; i < rooms.length; i++) {
-                if (rooms[i].getNumber().substring(1).equals(roomNumber.substring(1))) {
+                if (rooms[i].getNumber().substring(2).equals(roomNumber.substring(1))) {
                     return rooms[i];
                 }
             }

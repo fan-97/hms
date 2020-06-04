@@ -15,7 +15,7 @@ public class JDBCUtil {
     /** username */
     private static final String userName = "root";
     /** password */
-    private static final String password = "326543";
+    private static final String password = "123456";
 
     /** connection */
     private static Connection conn;

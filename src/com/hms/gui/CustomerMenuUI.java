@@ -84,9 +84,12 @@ public class CustomerMenuUI extends JFrame {
 
                     queryBtb.addActionListener(e2 -> {
                         JDialog bookedRoom = new JDialog(new JFrame());
-
+                        JScrollPane scrollPane = new JScrollPane();
                         JPanel p2 = new JPanel();
-                        p2.setLayout(new GridLayout(10, 6));
+                        RoomOrder roomOrder = new RoomOrder();
+                        roomOrder.setCustomerName(customer.getName());
+                        List<RoomOrder> roomOrders = roomOrderService.queryAll(roomOrder);
+                        p2.setLayout(new GridLayout(roomOrders.size() + 1, 6));
 
                         p2.add(new JLabel("room id"));
                         p2.add(new JLabel("room nubmer"));
@@ -94,21 +97,22 @@ public class CustomerMenuUI extends JFrame {
                         p2.add(new JLabel("order time"));
                         p2.add(new JLabel("live in time"));
                         p2.add(new JLabel("leave time"));
-                        RoomOrder roomOrder = new RoomOrder();
-                        roomOrder.setCustomerName(customer.getName());
-                        List<RoomOrder> roomOrders = roomOrderService.queryAll(roomOrder);
+
+
                         for (RoomOrder order : roomOrders) {
                             p2.add(new JLabel(order.getId() + ""));
                             p2.add(new JLabel(order.getRoomNumber()));
                             p2.add(new JLabel(order.getRoomType()));
-                            p2.add(new JLabel(formatter.format(order.getOrderTime())));
-                            p2.add(new JLabel(formatter.format(order.getLiveInTime())));
-                            p2.add(new JLabel(formatter.format(order.getLeaveTime())));
+                            p2.add(new JLabel(formatter.format(order.getOrderTime())+" "));
+                            p2.add(new JLabel(formatter.format(order.getLiveInTime())+" "));
+                            p2.add(new JLabel(formatter.format(order.getLeaveTime())+" "));
                         }
-
-                        bookedRoom.add(p2);
+                        scrollPane.setViewportView(p2);
+                        scrollPane.getViewport().setMinimumSize(new Dimension(300, 200));
+                        scrollPane.getViewport().setPreferredSize(new Dimension(300, 200));
+                        bookedRoom.add(scrollPane);
                         bookedRoom.setLocationRelativeTo(panel);
-                        bookedRoom.setSize(600, 800);
+                        bookedRoom.setSize(350, 250);
                         bookedRoom.setVisible(true);
                         bookedRoom.setDefaultCloseOperation(HIDE_ON_CLOSE);
                     });
@@ -157,7 +161,7 @@ public class CustomerMenuUI extends JFrame {
                         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
                         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
                         scrollPane.validate();
-                        p2.setLayout(new GridLayout(DataUtil.getRooms().length*4+1, 2));
+                        p2.setLayout(new GridLayout(DataUtil.getRooms().length * 4 + 1, 2));
 
                         p2.add(new JLabel("room nubmer"));
                         p2.add(new JLabel("room type"));
@@ -187,15 +191,31 @@ public class CustomerMenuUI extends JFrame {
                         bookedRoom.setDefaultCloseOperation(HIDE_ON_CLOSE);
                     });
                     bookBtn.addActionListener(e2 -> {
-                        try{
-                            LocalDateTime.parse(liveInTimeTF.getText());
-                        }catch (Exception ex){
-                            JOptionPane.showMessageDialog(panel2, "date format is error ,please input yyyy-MM-dd HH:mm:ss !!","error",JOptionPane.ERROR_MESSAGE);
+                        LocalDateTime liveIntime = LocalDateTime.now();
+                        LocalDateTime leaveTime = LocalDateTime.now();
+                        try {
+                            String time = " 00:00:00";
+                            liveIntime = LocalDateTime.parse(liveInTimeTF.getText()+time,formatter);
+                            leaveTime = LocalDateTime.parse(leaveTimeTF.getText()+time,formatter);
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(panel2, "date format is error ,please input yyyy-MM-dd!!", "error", JOptionPane.ERROR_MESSAGE);
                             System.out.println(ex);
-                            return ;
+                            return;
                         }
+
+
                         Room room = DataUtil.getRoom(roomId.getText());
-                        RoomOrder insert = roomOrderService.insert(new RoomOrder(customer.getName(), room.getType(), room.getNumber(), LocalDateTime.now(), LocalDateTime.parse(liveInTimeTF.getText()), LocalDateTime.parse(leaveTimeTF.getText())));
+                        if (room == null ) {
+                            JOptionPane.showMessageDialog(panel2, "The room has been booked !!", "error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        List<RoomOrder> roomOrders = roomOrderService.queryAll(new RoomOrder(null, null, room.getNumber(), null, liveIntime, leaveTime));
+                        if (roomOrders != null && roomOrders.size() >= 1) {
+                            JOptionPane.showMessageDialog(panel2, "The room has been booked  !!", "error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        RoomOrder insert = roomOrderService.insert(new RoomOrder(customer.getName(), room.getType(), roomId.getText(), LocalDateTime.now(), liveIntime, leaveTime));
                         if (insert != null) {
                             JOptionPane.showMessageDialog(panel2, "book room success!!");
                         } else {
@@ -210,26 +230,29 @@ public class CustomerMenuUI extends JFrame {
 
                 });
                 // book food
-                bookFood.addActionListener(e1->{
+                bookFood.addActionListener(e1 -> {
                     JDialog bookRoomDialog = new JDialog();
                     bookRoomDialog.setVisible(true);
-                    JTextField roomId = new JTextField();
-                    JTextField liveInTimeTF = new JTextField();
-                    JTextField leaveTimeTF = new JTextField();
+                    JTextField c1 = new JTextField();
+                    JTextField c2 = new JTextField();
+                    JTextField c3 = new JTextField();
+                    JTextField c4 = new JTextField();
                     JButton bookBtn = new JButton("book");
-                    JButton queryBtb = new JButton("show all room");
+                    JButton queryBtb = new JButton("show all food");
                     JPanel p = new JPanel();
-                    p.setLayout(new GridLayout(4, 2));
+                    p.setLayout(new GridLayout(5, 2));
 
-                    p.add(new JLabel("room number:"));
-                    p.add(roomId);
-                    p.add(new JLabel("live in time:"));
-                    p.add(liveInTimeTF);
-                    p.add(new JLabel("leave time:"));
-                    p.add(leaveTimeTF);
+                    p.add(new JLabel("Karen Adam:"));
+                    p.add(c1);
+                    p.add(new JLabel("Hari Philip:"));
+                    p.add(c2);
+                    p.add(new JLabel("Thalia Hensley:"));
+                    p.add(c3);
+                    p.add(new JLabel("Nisha Moss:"));
+                    p.add(c4);
                     p.add(bookBtn);
                     p.add(queryBtb);
-
+                    Chef[] chefs = DataUtil.getChefs(LocalDateTime.now().getDayOfWeek().getValue() + 2);
                     queryBtb.addActionListener(e2 -> {
                         JDialog bookedRoom = new JDialog(new JFrame());
                         bookedRoom.setLayout(new FlowLayout());
@@ -239,7 +262,7 @@ public class CustomerMenuUI extends JFrame {
                         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
                         scrollPane.validate();
 
-                        Chef[] chefs = DataUtil.getChefs(LocalDateTime.now().getDayOfWeek().getValue());
+
                         int rows = 0;
                         for (Chef chef : chefs) {
                             for (String menu : chef.getMenu()) {
@@ -247,7 +270,7 @@ public class CustomerMenuUI extends JFrame {
                             }
                         }
 
-                        p2.setLayout(new GridLayout(rows+1, 2,20,20));
+                        p2.setLayout(new GridLayout(rows + 1, 2, 20, 20));
                         p2.add(new JLabel("chef name"));
                         p2.add(new JLabel("food name"));
                         RoomOrder roomOrder = new RoomOrder();
@@ -270,20 +293,64 @@ public class CustomerMenuUI extends JFrame {
                         bookedRoom.setDefaultCloseOperation(HIDE_ON_CLOSE);
                     });
                     bookBtn.addActionListener(e2 -> {
-                        try{
-                            LocalDateTime.parse(liveInTimeTF.getText());
-                        }catch (Exception ex){
-                            JOptionPane.showMessageDialog(panel2, "date format is error ,please input yyyy-MM-dd HH:mm:ss !!","error",JOptionPane.ERROR_MESSAGE);
-                            System.out.println(ex);
-                            return ;
+
+
+                        if (c1.getText() != null && "".equals(c1.getText().trim())) {
+                            boolean flag = false;
+                            for (Chef chef : chefs) {
+                                if (chef.getName().equals("Karen Adam")) {
+                                    flag = true;
+                                    break;
+                                }
+                                if (flag) {
+                                    JOptionPane.showMessageDialog(panel2, "Karen Adam today is not worked!!don't book his food!");
+                                    return;
+                                }
+                            }
                         }
-                        Room room = DataUtil.getRoom(roomId.getText());
-                        RoomOrder insert = roomOrderService.insert(new RoomOrder(customer.getName(), room.getType(), room.getNumber(), LocalDateTime.now(), LocalDateTime.parse(liveInTimeTF.getText()), LocalDateTime.parse(leaveTimeTF.getText())));
-                        if (insert != null) {
-                            JOptionPane.showMessageDialog(panel2, "book room success!!");
-                        } else {
-                            JOptionPane.showMessageDialog(panel2, "book room failed!!");
+
+                        if (c2.getText() != null && "".equals(c2.getText().trim())) {
+                            boolean flag = false;
+                            for (Chef chef : chefs) {
+                                if (chef.getName().equals("Hari Philip")) {
+                                    flag = true;
+                                    break;
+                                }
+                                if (flag) {
+                                    JOptionPane.showMessageDialog(panel2, "Hari Philip today is not worked!!don't book his food!");
+                                    return;
+                                }
+                            }
                         }
+
+                        if (c3.getText() != null && "".equals(c3.getText().trim())) {
+                            boolean flag = false;
+                            for (Chef chef : chefs) {
+                                if (chef.getName().equals("Thalia Hensley")) {
+                                    flag = true;
+                                    break;
+                                }
+                                if (flag) {
+                                    JOptionPane.showMessageDialog(panel2, "Thalia Hensley today is not worked!!don't book his food!");
+                                    return;
+                                }
+                            }
+                        }
+
+                        if (c4.getText() != null && "".equals(c4.getText().trim())) {
+                            boolean flag = false;
+                            for (Chef chef : chefs) {
+                                if (chef.getName().equals("Nisha Moss")) {
+                                    flag = true;
+                                    break;
+                                }
+                                if (flag) {
+                                    JOptionPane.showMessageDialog(panel2, "Nisha Moss today is not worked!!don't book his food!");
+                                    return;
+                                }
+                            }
+                        }
+                        JOptionPane.showMessageDialog(panel2, "book success!!");
                     });
 
                     bookRoomDialog.setLayout(new FlowLayout());

@@ -76,7 +76,7 @@ public class CustomerDaoImpl {
 
     public int insert(Customer customer) {
         String sql = "insert into customer(username,password,passport,name,phone,email) values(?,?,?,?,?,?)";
-        return JDBCUtil.update(sql, customer.getUsername(), customer.getPassport(), customer.getPassport(), customer.getName(), customer.getPhone(), customer.getEmail());
+        return JDBCUtil.update(sql, customer.getUsername(), customer.getPassword(), customer.getPassport(), customer.getName(), customer.getPhone(), customer.getEmail());
     }
 
     public int update(Customer customer) {

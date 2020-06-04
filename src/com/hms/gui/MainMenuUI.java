@@ -32,6 +32,11 @@ public class MainMenuUI extends JFrame {
 
         });
 
+        employeeButton.addActionListener(e -> {
+            EmployeeMenuUI employeeMenuUI = new EmployeeMenuUI();
+
+        });
+
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
