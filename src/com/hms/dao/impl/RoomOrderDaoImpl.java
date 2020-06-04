@@ -40,15 +40,17 @@ public class RoomOrderDaoImpl {
             if (roomOrder.getLiveInTime() != null&&roomOrder.getLeaveTime()!=null) {
                 // return null means customer can order the room
                 sql += " and not (leave_time < ? or live_in_time > ?) ";
-                params.add(roomOrder.getLiveInTime());
-                params.add(roomOrder.getLeaveTime());
+                params.add(roomOrder.getLiveInTime().format(formatter));
+                params.add(roomOrder.getLeaveTime().format(formatter));
             }
             List<Map<String, Object>> list = JDBCUtil.executeQueryToList(sql, params.toArray(new Object[0]));
 
             if (list != null && list.size() >= 1) {
                 for (Map<String, Object> map : list) {
                     if (map != null && map.size() >= 1) {
-                        rs.add(new RoomOrder((String) map.get("customer_name"), (String) map.get("room_type"), (String) map.get("room_number"), LocalDateTime.parse(((String) map.get("order_time")).substring(0,19),formatter), LocalDateTime.parse(((String) map.get("live_in_time")).substring(0,19),formatter), LocalDateTime.parse(((String) map.get("leave_time")).substring(0,19),formatter)));
+                        RoomOrder roomOrder1 = new RoomOrder((String) map.get("customer_name"), (String) map.get("room_type"), (String) map.get("room_number"), LocalDateTime.parse(((String) map.get("order_time")).substring(0, 19), formatter), LocalDateTime.parse(((String) map.get("live_in_time")).substring(0, 19), formatter), LocalDateTime.parse(((String) map.get("leave_time")).substring(0, 19), formatter));
+                        roomOrder1.setId(Integer.parseInt((String)map.get("id")));
+                        rs.add(roomOrder1);
                     }
                 }
             }
@@ -69,5 +71,10 @@ public class RoomOrderDaoImpl {
     public int deleteById(Integer id) {
         String sql = "delete from room_order where id = ?";
         return JDBCUtil.update(sql, id);
+    }
+
+    public int deleteByCustomer(int roomNumber,String customserName){
+        String sql = "delete from room_order where room_number = ? and customer_name = ?";
+        return JDBCUtil.update(sql, roomNumber,customserName);
     }
 }

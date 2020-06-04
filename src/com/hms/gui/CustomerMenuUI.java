@@ -12,9 +12,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static com.hms.util.DataUtil.FLOOR;
 
 /**
  * @author fanjie
@@ -29,6 +32,7 @@ public class CustomerMenuUI extends JFrame {
     private CustomerService customerService = new CustomerService();
     private RoomOrderService roomOrderService = new RoomOrderService();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
 
     public CustomerMenuUI() {
         createUIComponents();
@@ -70,6 +74,7 @@ public class CustomerMenuUI extends JFrame {
                 cancelRoom.addActionListener(e1 -> {
 
                     JDialog cancelRoomDialog = new JDialog();
+                    cancelRoomDialog.setLayout(new FlowLayout());
                     cancelRoomDialog.setVisible(true);
                     JTextField roomId = new JTextField();
                     JButton cancelBtn = new JButton("cancel");
@@ -77,7 +82,7 @@ public class CustomerMenuUI extends JFrame {
                     JPanel p = new JPanel();
                     p.setLayout(new GridLayout(2, 2));
 
-                    p.add(new JLabel("room id:"));
+                    p.add(new JLabel("room number:"));
                     p.add(roomId);
                     p.add(cancelBtn);
                     p.add(queryBtb);
@@ -117,11 +122,11 @@ public class CustomerMenuUI extends JFrame {
                         bookedRoom.setDefaultCloseOperation(HIDE_ON_CLOSE);
                     });
                     cancelBtn.addActionListener(e2 -> {
-                        boolean b = roomOrderService.deleteById(Integer.parseInt(roomId.getText()));
+                        boolean b = roomOrderService.deleteByNumberAndCustomerName(Integer.parseInt(roomId.getText()),customer.getName());
                         if (b) {
                             JOptionPane.showMessageDialog(panel2, "cancel room success!!");
                         } else {
-                            JOptionPane.showMessageDialog(panel2, "cancel room failed!!");
+                            JOptionPane.showMessageDialog(panel2, "cancel room failed!!","error",JOptionPane.ERROR_MESSAGE);
                         }
                     });
 
@@ -161,14 +166,14 @@ public class CustomerMenuUI extends JFrame {
                         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
                         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
                         scrollPane.validate();
-                        p2.setLayout(new GridLayout(DataUtil.getRooms().length * 4 + 1, 2));
+                        p2.setLayout(new GridLayout(DataUtil.getRooms().length * FLOOR + 1, 2));
 
                         p2.add(new JLabel("room nubmer"));
                         p2.add(new JLabel("room type"));
                         RoomOrder roomOrder = new RoomOrder();
                         roomOrder.setCustomerName(customer.getName());
                         Room[] rooms = DataUtil.getRooms();
-                        for (int i = 1; i < 4; i++) {
+                        for (int i = 1; i < FLOOR; i++) {
                             for (Room room : rooms) {
                                 RoomOrder roomOrder1 = new RoomOrder();
                                 roomOrder1.setRoomNumber(String.format(room.getNumber(), i));
@@ -210,7 +215,7 @@ public class CustomerMenuUI extends JFrame {
                             return;
                         }
 
-                        List<RoomOrder> roomOrders = roomOrderService.queryAll(new RoomOrder(null, null, room.getNumber(), null, liveIntime, leaveTime));
+                        List<RoomOrder> roomOrders = roomOrderService.queryAll(new RoomOrder(null, null,  roomId.getText(), null, liveIntime, leaveTime));
                         if (roomOrders != null && roomOrders.size() >= 1) {
                             JOptionPane.showMessageDialog(panel2, "The room has been booked  !!", "error", JOptionPane.ERROR_MESSAGE);
                             return;
@@ -237,10 +242,11 @@ public class CustomerMenuUI extends JFrame {
                     JTextField c2 = new JTextField();
                     JTextField c3 = new JTextField();
                     JTextField c4 = new JTextField();
+                    JTextField c5 = new JTextField();
                     JButton bookBtn = new JButton("book");
                     JButton queryBtb = new JButton("show all food");
                     JPanel p = new JPanel();
-                    p.setLayout(new GridLayout(5, 2));
+                    p.setLayout(new GridLayout(6, 2));
 
                     p.add(new JLabel("Karen Adam:"));
                     p.add(c1);
@@ -250,10 +256,20 @@ public class CustomerMenuUI extends JFrame {
                     p.add(c3);
                     p.add(new JLabel("Nisha Moss:"));
                     p.add(c4);
+                    p.add(new JLabel("Witch time:"));
+                    p.add(c5);
                     p.add(bookBtn);
                     p.add(queryBtb);
-                    Chef[] chefs = DataUtil.getChefs(LocalDateTime.now().getDayOfWeek().getValue() + 2);
                     queryBtb.addActionListener(e2 -> {
+                        String witchTime = c5.getText();
+                        LocalDate bookTime;
+                        try {
+                            bookTime = LocalDate.parse(witchTime);
+                        }catch (Exception ex) {
+                            JOptionPane.showMessageDialog(panel2,"date formatter must 'yyyy-MM-dd'");
+                            return ;
+                        }
+                        Chef[] chefs = DataUtil.getChefs(bookTime.getDayOfWeek().getValue() + 2);
                         JDialog bookedRoom = new JDialog(new JFrame());
                         bookedRoom.setLayout(new FlowLayout());
                         JPanel p2 = new JPanel();
@@ -261,7 +277,6 @@ public class CustomerMenuUI extends JFrame {
                         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
                         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
                         scrollPane.validate();
-
 
                         int rows = 0;
                         for (Chef chef : chefs) {
@@ -293,7 +308,15 @@ public class CustomerMenuUI extends JFrame {
                         bookedRoom.setDefaultCloseOperation(HIDE_ON_CLOSE);
                     });
                     bookBtn.addActionListener(e2 -> {
-
+                        String witchTime = c5.getText();
+                        LocalDate bookTime;
+                        try {
+                            bookTime = LocalDate.parse(witchTime);
+                        }catch (Exception ex) {
+                            JOptionPane.showMessageDialog(panel2,"date formatter must 'yyyy-MM-dd'");
+                            return ;
+                        }
+                        Chef[] chefs = DataUtil.getChefs(bookTime.getDayOfWeek().getValue() + 2);
 
                         if (c1.getText() != null && "".equals(c1.getText().trim())) {
                             boolean flag = false;

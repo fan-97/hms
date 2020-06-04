@@ -149,10 +149,11 @@ public class JDBCUtil {
         try {
             rs = executeSql(sql, args);
             List<Map<String, Object>> resultList = new ArrayList<>();
-            Map<String, Object> resultMap = new HashMap<>();
+
             while (rs.next()) {
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
+                Map<String, Object> resultMap = new HashMap<>();
                 for (int i = 1; i <= columnCount; i++) {
                     resultMap.put(metaData.getColumnName(i), rs.getString(i));
                 }

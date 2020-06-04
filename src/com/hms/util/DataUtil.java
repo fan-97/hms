@@ -12,6 +12,7 @@ import java.util.List;
 public class DataUtil {
     private static Chef[] chefs;
     private static Room[] rooms;
+    public static final int FLOOR = 10;
 
     static {
         // prepared data

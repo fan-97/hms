@@ -31,4 +31,8 @@ public class RoomOrderService {
         return roomOrderDao.queryAll(roomOrder);
     }
 
+    public boolean deleteByNumberAndCustomerName(int roomNumber, String customerName) {
+        return roomOrderDao.deleteByCustomer(roomNumber, customerName) >= 1;
+    }
+
 }
