@@ -209,8 +209,8 @@ public class CustomerMenuUI extends JFrame {
             try {
                 bookTime = LocalDate.parse(witchTime);
                 if (LocalDate.now().plusDays(2).compareTo(bookTime) > 0) {
-                    JOptionPane.showMessageDialog(panel2,"Book at least two days in advance","error",JOptionPane.ERROR_MESSAGE);
-                    return ;
+                    JOptionPane.showMessageDialog(panel2, "Book at least two days in advance", "error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(panel2, "date formatter must 'yyyy-MM-dd'");
@@ -259,82 +259,31 @@ public class CustomerMenuUI extends JFrame {
             LocalDate bookTime;
             try {
                 bookTime = LocalDate.parse(witchTime);
+                System.out.println(bookTime);
                 if (LocalDate.now().plusDays(2).compareTo(bookTime) > 0) {
-                    JOptionPane.showMessageDialog(panel2,"Book at least two days in advance","error",JOptionPane.ERROR_MESSAGE);
-                    return ;
+                    JOptionPane.showMessageDialog(panel2, "Book at least two days in advance", "error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(panel2, "date formatter must 'yyyy-MM-dd'");
                 return;
             }
+
+            if(allEmpty(c1,c2,c3,c4)) {
+                JOptionPane.showMessageDialog(panel2, "book food is empty!", "error", JOptionPane.ERROR_MESSAGE);
+                return ;
+            }
+
             Chef[] chefs = DataUtil.getChefs(bookTime.getDayOfWeek().getValue() + 2);
-            int empty = 0;
-            if (c1.getText() != null && "".equals(c1.getText().trim())) {
-                boolean flag = false;
-                for (Chef chef : chefs) {
-                    if (chef.getName().equals("Karen Adam")) {
-                        flag = true;
-                        break;
-                    }
-                    if (flag) {
-                        JOptionPane.showMessageDialog(panel2, "Karen Adam today is not worked!!don't book his food!","error",JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-            }else{
-                empty ++;
+
+            if(!(checkBookFood(chefs,"Karen Adam",c1.getText())
+                    &&checkBookFood(chefs,"Hari Philip",c2.getText())
+                    &&checkBookFood(chefs,"Thalia Hensley",c3.getText())
+                    &&checkBookFood(chefs,"Nisha Moss",c4.getText()))) {
+                JOptionPane.showMessageDialog(panel2, "book fialed!Please enter the information in the searched menu!", "error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
 
-            if (c2.getText() != null && "".equals(c2.getText().trim())) {
-                boolean flag = false;
-                for (Chef chef : chefs) {
-                    if (chef.getName().equals("Hari Philip")) {
-                        flag = true;
-                        break;
-                    }
-                    if (flag) {
-                        JOptionPane.showMessageDialog(panel2, "Hari Philip today is not worked!!don't book his food!","error",JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-            }else {
-                empty++;
-            }
-
-            if (c3.getText() != null && "".equals(c3.getText().trim())) {
-                boolean flag = false;
-                for (Chef chef : chefs) {
-                    if (chef.getName().equals("Thalia Hensley")) {
-                        flag = true;
-                        break;
-                    }
-                    if (flag) {
-                        JOptionPane.showMessageDialog(panel2, "Thalia Hensley today is not worked!!don't book his food!","error",JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-            }else {
-                empty++;
-            }
-
-            if (c4.getText() != null && "".equals(c4.getText().trim())) {
-                boolean flag = false;
-                for (Chef chef : chefs) {
-                    if (chef.getName().equals("Nisha Moss")) {
-                        flag = true;
-                        break;
-                    }
-                    if (flag) {
-                        JOptionPane.showMessageDialog(panel2, "Nisha Moss today is not worked!!don't book his food!","error",JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-            }else {
-                empty++;
-            }
-            if(empty==4) {
-                JOptionPane.showMessageDialog(panel2, "You didn't order any food","error",JOptionPane.ERROR_MESSAGE);
-            }
             JOptionPane.showMessageDialog(panel2, "book success!!");
         });
 
@@ -342,6 +291,32 @@ public class CustomerMenuUI extends JFrame {
         bookRoomDialog.add(p);
         bookRoomDialog.setSize(400, 200);
         bookRoomDialog.setLocationRelativeTo(null);
+    }
+
+    private boolean allEmpty(JTextField... tf){
+        for (JTextField field : tf) {
+            if(field.getText()!=null&&!field.getText().trim().equals("")){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkBookFood(Chef[] chefs, String chef, String food) {
+        if (food != null && !"".equals(food.trim())) {
+            for (Chef c : chefs) {
+                if (c.getName().equals(chef)) {
+                    String[] menu = c.getMenu();
+                    for (String m : menu) {
+                        if(m.equals(food)){
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+       return true;
     }
 
     private void bookRoom() {
